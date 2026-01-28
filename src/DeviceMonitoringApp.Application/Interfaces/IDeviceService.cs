@@ -1,4 +1,6 @@
-﻿namespace DeviceMonitoringApp.Application.Interfaces;
+using DeviceMonitoringApp.Domain.Entities;
+
+namespace DeviceMonitoringApp.Application.Interfaces;
 
 public interface IDeviceService
 {

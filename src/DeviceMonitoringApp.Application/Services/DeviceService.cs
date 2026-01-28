@@ -1,4 +1,5 @@
-﻿using DeviceMonitoringApp.Application.Interfaces;
+using DeviceMonitoringApp.Application.Interfaces;
+using DeviceMonitoringApp.Domain.Entities;
 
 namespace DeviceMonitoringApp.Application.Services;
 

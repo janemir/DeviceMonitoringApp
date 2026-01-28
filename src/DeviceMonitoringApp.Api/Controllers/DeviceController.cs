@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using DeviceMonitoringApp.Application.Interfaces;
-
+using DeviceMonitoringApp.Domain.Entities;
 
 namespace DeviceMonitoringApp.Api.Controllers;
 
