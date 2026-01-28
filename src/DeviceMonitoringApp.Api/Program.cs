@@ -1,5 +1,6 @@
-using System.Reflection;
 using DeviceMonitoringApp.Infrastructure.Extensions;
+using DeviceMonitoringApp.Infrastructure.Repositories;
+using DeviceMonitoringApp.Application.Interfaces;
 using ShopWebApp.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,8 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.MigrateDatabase(builder.Configuration);
-//builder.Services.AddRepositories();
-//builder.Services.AddServices();
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 builder.WebHost.UseUrls("http://*:80");
