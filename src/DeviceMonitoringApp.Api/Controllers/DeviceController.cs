@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
 using DeviceMonitoringApp.Application.Interfaces;
 using DeviceMonitoringApp.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace DeviceMonitoringApp.Api.Controllers;
 
@@ -9,7 +10,7 @@ namespace DeviceMonitoringApp.Api.Controllers;
 /// </summary>
 [Route("api/device")]
 [ApiController]
-public class DeviceController(IDeviceService deviceInterface) : ControllerBase
+public class DeviceController(IDeviceService deviceService, ILogger<DeviceController> logger) : ControllerBase
 {
     /// <summary>
     /// Adds a new device usage entry.
@@ -18,7 +19,14 @@ public class DeviceController(IDeviceService deviceInterface) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddDeviceAsync([FromBody] Device device) // TODO: Сделать модельку
     {
-        return Ok(await deviceInterface.AddAsync(device));
+        logger.LogInformation("Received new device usage record for device {DeviceId} (user: {User})",
+            device.Id, device.Name);
+
+        var id = await deviceService.AddAsync(device);
+
+        logger.LogInformation("Successfully stored device usage record for device {DeviceId}", id);
+
+        return Ok(id);
     }
 
     /// <summary>
@@ -27,7 +35,12 @@ public class DeviceController(IDeviceService deviceInterface) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllDevicesAsync()
     {
-        var devices = await deviceInterface.GetAllDevicesAsync();
+        logger.LogInformation("Request to get all devices");
+
+        var devices = await deviceService.GetAllDevicesAsync();
+
+        logger.LogInformation("Returned {Count} devices", devices.Count);
+
         return Ok(devices);
     }
 
@@ -38,7 +51,12 @@ public class DeviceController(IDeviceService deviceInterface) : ControllerBase
     [HttpGet("{deviceId:guid}/stats")]
     public async Task<IActionResult> GetDeviceStatsAsync(Guid deviceId)
     {
-        var stats = await deviceInterface.GetDeviceStatsAsync(deviceId);
+        logger.LogInformation("Request to get stats for device {DeviceId}", deviceId);
+
+        var stats = await deviceService.GetDeviceStatsAsync(deviceId);
+
+        logger.LogInformation("Returned {Count} usage records for device {DeviceId}", stats.Count, deviceId);
+
         return Ok(stats);
     }
 }
