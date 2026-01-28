@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>DeviceMonitoringApp.Api</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="dbup-postgresql" Version="6.1.5" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DeviceMonitoringApp.Domain\DeviceMonitoringApp.Domain.csproj" />
+    <ProjectReference Include="..\DeviceMonitoringApp.Application\DeviceMonitoringApp.Application.csproj" />
+    <ProjectReference Include="..\DeviceMonitoringApp.Infrastructure\DeviceMonitoringApp.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
