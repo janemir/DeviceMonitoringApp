@@ -1,7 +1,9 @@
+using DeviceMonitoringApp.Api.Models;
 using DeviceMonitoringApp.Application.Interfaces;
 using DeviceMonitoringApp.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace DeviceMonitoringApp.Api.Controllers;
 
@@ -39,9 +41,13 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
 
         var devices = await deviceService.GetAllDevicesAsync();
 
-        logger.LogInformation("Returned {Count} devices", devices.Count);
+        var result = devices
+            .Select(d => new DeviceDto(d.Id, d.Name, d.Version))
+            .ToArray();
 
-        return Ok(devices);
+        logger.LogInformation("Returned {Count} devices", result.Length);
+
+        return Ok(result);
     }
 
     /// <summary>
@@ -55,8 +61,12 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
 
         var stats = await deviceService.GetDeviceStatsAsync(deviceId);
 
-        logger.LogInformation("Returned {Count} usage records for device {DeviceId}", stats.Count, deviceId);
+        var result = stats
+            .Select(d => new DeviceUsageDto(d.Id, d.Name, d.StartTime, d.EndTime, d.Version))
+            .ToArray();
 
-        return Ok(stats);
+        logger.LogInformation("Returned {Count} usage records for device {DeviceId}", result.Length, deviceId);
+
+        return Ok(result);
     }
 }
