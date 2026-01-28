@@ -11,4 +11,14 @@ public class DeviceService(IDeviceRepository deviceRepository) : IDeviceService
         // Here we could later add validation, mapping, logging, etc.
         return deviceRepository.AddAsync(device);
     }
+
+    public Task<IReadOnlyCollection<Device>> GetAllDevicesAsync()
+    {
+        return deviceRepository.GetAllAsync();
+    }
+
+    public Task<IReadOnlyCollection<Device>> GetDeviceStatsAsync(Guid deviceId)
+    {
+        return deviceRepository.GetByDeviceIdAsync(deviceId);
+    }
 }
