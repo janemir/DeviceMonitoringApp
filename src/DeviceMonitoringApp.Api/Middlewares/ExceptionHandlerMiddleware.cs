@@ -1,6 +1,6 @@
 using DeviceMonitoringApp.Domain.Exceptions;
 
-namespace ShopWebApp.Middlewares;
+namespace DeviceMonitoringApp.Middlewares;
 
 /// <summary>
 /// Middleware обработки исключений.
