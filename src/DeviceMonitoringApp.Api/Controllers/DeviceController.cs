@@ -42,7 +42,7 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
         var devices = await deviceService.GetAllDevicesAsync();
 
         var result = devices
-            .Select(d => new DeviceDto(d.Id, d.Name, d.Version))
+            .Select(d => new DeviceDto(d.Id, d.Name, d.Version, d.StartTime, d.EndTime))
             .ToArray();
 
         logger.LogInformation("Returned {Count} devices", result.Length);
@@ -63,7 +63,8 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
             return NotFound();
         }
 
-        var result = new DeviceDto(device.Id, device.Name, device.Version);
+        var result = new DeviceDto(device.Id, device.Name, device.Version,
+            device.StartTime, device.EndTime);
 
         logger.LogInformation("Returned device with id {DeviceId}", deviceId);
 

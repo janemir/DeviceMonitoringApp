@@ -12,9 +12,14 @@ public class DeviceService(IDeviceRepository deviceRepository) : IDeviceService
         return deviceRepository.AddAsync(device);
     }
 
-    public Task<IReadOnlyCollection<Device>> GetAllDevicesAsync()
+    public async Task<IReadOnlyCollection<Device>> GetAllDevicesAsync()
     {
-        return deviceRepository.GetAllAsync();
+        var allDevices = await deviceRepository.GetAllAsync();
+
+        return allDevices
+            .GroupBy(d => d.Id)
+            .Select(g => g.OrderByDescending(d => d.StartTime).First())
+            .ToList();
     }
 
     public Task<IReadOnlyCollection<Device>> GetDeviceStatsAsync(Guid deviceId)

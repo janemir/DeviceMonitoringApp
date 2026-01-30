@@ -3,7 +3,8 @@ namespace DeviceMonitoringApp.Api.Models;
 /// <summary>
 /// DTO used to represent a device in lists.
 /// </summary>
-public record DeviceDto(Guid Id, string Name, string Version);
+public record DeviceDto(Guid Id, string Name, string Version,
+    DateTime StartTime, DateTime EndTime);
 
 /// <summary>
 /// DTO used to represent a single device usage record.
