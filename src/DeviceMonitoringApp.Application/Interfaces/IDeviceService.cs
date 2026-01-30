@@ -18,4 +18,6 @@ public interface IDeviceService
     /// Returns all usage records for a specific device.
     /// </summary>
     Task<IReadOnlyCollection<Device>> GetDeviceStatsAsync(Guid deviceId);
+
+    Task<Device?> GetDeviceByIdAsync(Guid deviceId);
 }

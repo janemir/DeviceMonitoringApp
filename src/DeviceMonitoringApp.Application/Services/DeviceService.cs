@@ -21,4 +21,10 @@ public class DeviceService(IDeviceRepository deviceRepository) : IDeviceService
     {
         return deviceRepository.GetByDeviceIdAsync(deviceId);
     }
+
+    public async Task<Device?> GetDeviceByIdAsync(Guid deviceId)
+    {
+        var allRecords = await deviceRepository.GetByDeviceIdAsync(deviceId);
+        return allRecords.OrderByDescending(d => d.StartTime).FirstOrDefault();
+    }
 }

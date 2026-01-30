@@ -50,6 +50,26 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
         return Ok(result);
     }
 
+    [HttpGet("{deviceId:guid}")]
+    public async Task<IActionResult> GetDeviceByIdAsync(Guid deviceId)
+    {
+        logger.LogInformation("Request to get device by id: {DeviceId}", deviceId);
+
+        var device = await deviceService.GetDeviceByIdAsync(deviceId);
+
+        if (device == null)
+        {
+            logger.LogWarning("Device with id {DeviceId} not found", deviceId);
+            return NotFound();
+        }
+
+        var result = new DeviceDto(device.Id, device.Name, device.Version);
+
+        logger.LogInformation("Returned device with id {DeviceId}", deviceId);
+
+        return Ok(result);
+    }
+
     /// <summary>
     /// Returns usage statistics for a specific device.
     /// </summary>
