@@ -1,9 +1,7 @@
-version: '3.8'
+
 
 services:
-
-  shopweb.api:
-    image: device-app
+  device-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,24 +10,27 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DatabaseConnection=Host=postgres;Port=5432;Database=devices;Username=postgres;Password=postgres
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
     networks:
-      - devicenetwork
+      - device-network
+    volumes:
+      - ./backups:/app/Backups
 
-  devicemonitoringui:
+  device-ui:
     build:
-      context: C:/Users/User/source/repos/DeviceMonitoringService/SPA/device-monitoring-ui
+      context: ../../source/repos/DeviceMonitoringService/SPA/device-monitoring-ui
       dockerfile: Dockerfile
     ports:
       - "8080:80"
     depends_on:
-      - shopweb.api
+      - device-api
     networks:
-      - devicenetwork
+      - device-network
 
-  db:
+  postgres:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -40,7 +41,7 @@ services:
     ports:
       - "5435:5432"
     networks:
-      - devicenetwork
+      - device-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -48,7 +49,7 @@ services:
       retries: 5
 
 networks:
-  devicenetwork:
+  device-network:
     driver: bridge
 
 volumes:
