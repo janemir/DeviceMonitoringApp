@@ -23,10 +23,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.MigrateDatabase(builder.Configuration);
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
-
 builder.Services.AddScoped<IDeviceService, DeviceService>();
-
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
+builder.Services.AddScoped<IBackupService, BackupService>();
 // builder.WebHost.UseUrls("http://*:80");
 
 var app = builder.Build();

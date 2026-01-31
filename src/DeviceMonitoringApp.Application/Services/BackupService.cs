@@ -11,7 +11,8 @@ public class BackupService : IBackupService
     private readonly ILogger<BackupService> _logger;
     private Timer? _backupTimer;
     private readonly TimeSpan _defaultInterval = TimeSpan.FromHours(1);
-
+    private DateTime? _lastBackupTime;
+    private string? _lastBackupPath;
     public BackupService(IDeviceRepository repository, ILogger<BackupService> logger)
     {
         _repository = repository;
@@ -51,8 +52,17 @@ public class BackupService : IBackupService
             _logger.LogError(ex, "Failed to create backup");
             throw;
         }
+
     }
 
+    public string GetLastBackupInfo()
+    {
+        if (_lastBackupTime == null)
+            return "No backups created yet";
+
+        var fileInfo = new FileInfo(_lastBackupPath!);
+        return $"Last backup: {_lastBackupTime:yyyy-MM-dd HH:mm:ss}, Path: {_lastBackupPath}, Size: {fileInfo.Length} bytes";
+    }
     public void StartPeriodicBackup(TimeSpan interval = default)
     {
         if (interval == default)
