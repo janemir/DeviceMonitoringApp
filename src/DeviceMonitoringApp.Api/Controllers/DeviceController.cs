@@ -8,36 +8,36 @@ using System.Linq;
 namespace DeviceMonitoringApp.Api.Controllers;
 
 /// <summary>
-/// Device controller
+/// Контроллер устройства
 /// </summary>
 [Route("api/device")]
 [ApiController]
 public class DeviceController(IDeviceService deviceService, ILogger<DeviceController> logger) : ControllerBase
 {
     /// <summary>
-    /// Adds a new device usage entry.
+    /// Добавление новой записи об использовании устройства
     /// </summary>
-    /// <returns>Created device id.</returns>
+    /// <returns> id созданного устройства </returns>
     [HttpPost]
     public async Task<IActionResult> AddDeviceAsync([FromBody] Device device)
     {
-        logger.LogInformation("Received new device usage record for device {DeviceId} (user: {User})",
+        logger.LogInformation("Получена новая запись об использовании устройства {DeviceId} (Пользователь: {User})",
             device.Id, device.Name);
 
         var id = await deviceService.AddAsync(device);
 
-        logger.LogInformation("Successfully stored device usage record for device {DeviceId}", id);
+        logger.LogInformation("Запись об использовании устройства {DeviceId} успешно созранена", id);
 
         return Ok(id);
     }
 
     /// <summary>
-    /// Returns all devices (one record per device).
+    /// Возвращение по одной записи на каждое устройство
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAllDevicesAsync()
     {
-        logger.LogInformation("Request to get all devices");
+        logger.LogInformation("Запрос на получение информации обо всех устройствах");
 
         var devices = await deviceService.GetAllDevicesAsync();
 
@@ -45,7 +45,7 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
             .Select(d => new DeviceDto(d.Id, d.Name, d.Version, d.StartTime, d.EndTime))
             .ToArray();
 
-        logger.LogInformation("Returned {Count} devices", result.Length);
+        logger.LogInformation("Устройств возвращено: {Count} ", result.Length);
 
         return Ok(result);
     }
@@ -53,32 +53,32 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
     [HttpGet("{deviceId:guid}")]
     public async Task<IActionResult> GetDeviceByIdAsync(Guid deviceId)
     {
-        logger.LogInformation("Request to get device by id: {DeviceId}", deviceId);
+        logger.LogInformation("Запрос на получение устройства по id: {DeviceId}", deviceId);
 
         var device = await deviceService.GetDeviceByIdAsync(deviceId);
 
         if (device == null)
         {
-            logger.LogWarning("Device with id {DeviceId} not found", deviceId);
+            logger.LogWarning("Устройство с id {DeviceId} не найдено", deviceId);
             return NotFound();
         }
 
         var result = new DeviceDto(device.Id, device.Name, device.Version,
             device.StartTime, device.EndTime);
 
-        logger.LogInformation("Returned device with id {DeviceId}", deviceId);
+        logger.LogInformation("Возвращено устройство с id {DeviceId}", deviceId);
 
         return Ok(result);
     }
 
     /// <summary>
-    /// Returns usage statistics for a specific device.
+    /// Возвращение статистики использования конкретного устройства
     /// </summary>
-    /// <param name="deviceId">Device identifier.</param>
+    /// <param name="deviceId">Идентификатор устройства</param>
     [HttpGet("{deviceId:guid}/stats")]
     public async Task<IActionResult> GetDeviceStatsAsync(Guid deviceId)
     {
-        logger.LogInformation("Request to get stats for device {DeviceId}", deviceId);
+        logger.LogInformation("Запрос на получение статистики для устройства {DeviceId}", deviceId);
 
         var stats = await deviceService.GetDeviceStatsAsync(deviceId);
 
@@ -86,7 +86,7 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
             .Select(d => new DeviceUsageDto(d.Id, d.Name, d.StartTime, d.EndTime, d.Version))
             .ToArray();
 
-        logger.LogInformation("Returned {Count} usage records for device {DeviceId}", result.Length, deviceId);
+        logger.LogInformation("Возвращено {Count} записей об использовании устройства {DeviceId}", result.Length, deviceId);
 
         return Ok(result);
     }

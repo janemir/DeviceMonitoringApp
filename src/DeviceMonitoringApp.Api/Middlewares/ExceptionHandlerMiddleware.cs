@@ -3,7 +3,7 @@ using DeviceMonitoringApp.Domain.Exceptions;
 namespace DeviceMonitoringApp.Middlewares;
 
 /// <summary>
-/// Middleware обработки исключений.
+/// Middleware обработки исключений
 /// </summary>
 internal sealed class ExceptionHandlingMiddleware : IMiddleware
 {
@@ -29,10 +29,10 @@ internal sealed class ExceptionHandlingMiddleware : IMiddleware
     }
 
     /// <summary>
-    /// Обрабатывает исключение.
+    /// Обрабатывает исключение
     /// </summary>
-    /// <param name="context">Контекст HTTP-запроса и HTTP-ответа.</param>
-    /// <param name="exception">Исключение.</param>
+    /// <param name="context">Контекст HTTP-запроса и HTTP-ответа</param>
+    /// <param name="exception">Исключение</param>
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.StatusCode = exception switch

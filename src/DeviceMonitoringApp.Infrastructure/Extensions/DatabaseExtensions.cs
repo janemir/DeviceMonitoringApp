@@ -8,11 +8,8 @@ namespace DeviceMonitoringApp.Infrastructure.Extensions;
 public static class DatabaseExtensions
 {
     /// <summary>
-    /// Do database migration
+    /// Выполнение миграции БД
     /// </summary>
-    /// <param name="services"><see cref="IServiceCollection"/>.</param>
-    /// <param name="configuration"><see cref="IConfiguration"/>.</param>
-    /// <returns><see cref="IConfiguration"/>.</returns>
     public static IServiceCollection MigrateDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DatabaseConnection");

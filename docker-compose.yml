@@ -21,7 +21,7 @@ services:
 
   device-ui:
     build:
-      context: ../../source/repos/DeviceMonitoringService/SPA/device-monitoring-ui
+      context:  ../../SPA/DeviceMonitoringService/SPA/device-monitoring-ui
       dockerfile: Dockerfile
     ports:
       - "8080:80"

@@ -5,19 +5,22 @@ namespace DeviceMonitoringApp.Application.Interfaces;
 public interface IDeviceService
 {
     /// <summary>
-    /// Adds a new device usage record.
+    /// Добавление новой записи об использовании устройства
     /// </summary>
     Task<Guid> AddAsync(Device device);
 
     /// <summary>
-    /// Returns one record per device to display all devices.
+    /// Возвращение одной записи для каждого устройства, чтобы отобразить все устройства
     /// </summary>
     Task<IReadOnlyCollection<Device>> GetAllDevicesAsync();
 
     /// <summary>
-    /// Returns all usage records for a specific device.
+    /// Возвращает все записи об использовании для конкретного устройства
     /// </summary>
     Task<IReadOnlyCollection<Device>> GetDeviceStatsAsync(Guid deviceId);
 
+    /// <summary>
+    /// Получение последней запись устройства по id
+    /// </summary>
     Task<Device?> GetDeviceByIdAsync(Guid deviceId);
 }

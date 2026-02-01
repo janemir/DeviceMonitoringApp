@@ -18,30 +18,30 @@ public class BackupController : ControllerBase
     }
 
     /// <summary>
-    /// Manually trigger a backup
+    /// Запуск резервного копировния
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateBackup()
     {
-        _logger.LogInformation("Manual backup triggered via API");
+        _logger.LogInformation("Ручное резервное копирование запущено через API");
 
         try
         {
             await _backupService.CreateBackupAsync();
             return Ok(new {
-                message = "Backup created successfully",
+                message = "Резервная копия успешно создана",
                 info = _backupService.GetLastBackupInfo()
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create manual backup");
+            _logger.LogError(ex, "Не удалось создать резервную копию вручную");
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Get information about last backup
+    /// Получение информации о последнем резервном копировании
     /// </summary>
     [HttpGet]
     public IActionResult GetBackupInfo()
