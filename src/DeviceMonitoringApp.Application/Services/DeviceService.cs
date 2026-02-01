@@ -5,9 +5,9 @@ namespace DeviceMonitoringApp.Application.Services;
 
 public class DeviceService(IDeviceRepository deviceRepository) : IDeviceService
 {
-    public Task<Guid> AddAsync(Device device)
+    public async Task<Guid> AddAsync(Device device)
     {
-        return deviceRepository.AddAsync(device);
+        return await deviceRepository.AddAsync(device);
     }
 
     public async Task<IReadOnlyCollection<Device>> GetAllDevicesAsync()

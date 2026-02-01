@@ -3,6 +3,5 @@
 public interface IBackupService
 {
     Task CreateBackupAsync();
-    void StartPeriodicBackup(TimeSpan interval = default);
     string GetLastBackupInfo();
 }

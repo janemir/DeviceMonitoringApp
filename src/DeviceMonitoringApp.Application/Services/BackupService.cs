@@ -1,5 +1,4 @@
 ﻿using DeviceMonitoringApp.Application.Interfaces;
-using DeviceMonitoringApp.Domain.Entities;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
@@ -10,7 +9,6 @@ public class BackupService : IBackupService
     private readonly IDeviceRepository _repository;
     private readonly ILogger<BackupService> _logger;
     private Timer? _backupTimer;
-    private readonly TimeSpan _defaultInterval = TimeSpan.FromHours(1);
     private DateTime? _lastBackupTime;
     private string? _lastBackupPath;
     public BackupService(IDeviceRepository repository, ILogger<BackupService> logger)
@@ -62,24 +60,5 @@ public class BackupService : IBackupService
 
         var fileInfo = new FileInfo(_lastBackupPath!);
         return $"Last backup: {_lastBackupTime:yyyy-MM-dd HH:mm:ss}, Path: {_lastBackupPath}, Size: {fileInfo.Length} bytes";
-    }
-    public void StartPeriodicBackup(TimeSpan interval = default)
-    {
-        if (interval == default)
-            interval = _defaultInterval;
-
-        _backupTimer = new Timer(async _ =>
-        {
-            try
-            {
-                await CreateBackupAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during periodic backup");
-            }
-        }, null, TimeSpan.Zero, interval);
-
-        _logger.LogInformation("Periodic backup started with interval: {Interval}", interval);
     }
 }

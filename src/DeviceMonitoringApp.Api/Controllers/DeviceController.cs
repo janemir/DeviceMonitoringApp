@@ -19,7 +19,7 @@ public class DeviceController(IDeviceService deviceService, ILogger<DeviceContro
     /// </summary>
     /// <returns>Created device id.</returns>
     [HttpPost]
-    public async Task<IActionResult> AddDeviceAsync([FromBody] Device device) // TODO: Сделать модельку
+    public async Task<IActionResult> AddDeviceAsync([FromBody] Device device)
     {
         logger.LogInformation("Received new device usage record for device {DeviceId} (user: {User})",
             device.Id, device.Name);

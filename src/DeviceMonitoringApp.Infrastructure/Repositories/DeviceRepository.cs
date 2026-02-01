@@ -1,39 +1,43 @@
-using System.Data;
 using DeviceMonitoringApp.Application.Interfaces;
 using DeviceMonitoringApp.Domain.Entities;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using System.Data;
 
 namespace DeviceMonitoringApp.Infrastructure.Repositories;
 
-public class DeviceRepository(IConfiguration configuration, ILogger<DeviceRepository> logger) : IDeviceRepository
+public class DeviceRepository(IConfiguration configuration, ILogger<DeviceRepository> logger)
+    : IDeviceRepository
 {
     private readonly string _connectionString =
         configuration.GetConnectionString("DatabaseConnection")
-        ?? throw new InvalidOperationException("DatabaseConnection connection string is not configured.");
+        ?? throw new InvalidOperationException(
+            "DatabaseConnection connection string is not configured.");
 
     public async Task<Guid> AddAsync(Device device)
     {
         await using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        await using var transaction = await connection.BeginTransactionAsync();
 
         try
         {
-            await connection.OpenAsync();
+            const string sql = """
+                               INSERT INTO device_usage
+                                   (device_id, user_name, start_time, end_time, app_version)
+                               VALUES
+                                   (@Id, @Name, @StartTime, @EndTime, @Version);
+                               """;
 
-        const string sql = """
-                           INSERT INTO device_usage (device_id, user_name, start_time, end_time, app_version)
-                           VALUES (@device_id, @user_name, @start_time, @end_time, @app_version);
-                           """;
+            var rows = await connection.ExecuteAsync(
+                sql,
+                device,
+                transaction);
 
-            await using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("device_id", device.Id);
-            command.Parameters.AddWithValue("user_name", device.Name);
-            command.Parameters.AddWithValue("start_time", device.StartTime);
-            command.Parameters.AddWithValue("end_time", device.EndTime);
-            command.Parameters.AddWithValue("app_version", device.Version);
-
-            var rows = await command.ExecuteNonQueryAsync();
+            await transaction.CommitAsync();
 
             logger.LogInformation(
                 "Inserted {Rows} row(s) into device_usage for device {DeviceId} (user: {User})",
@@ -43,9 +47,13 @@ public class DeviceRepository(IConfiguration configuration, ILogger<DeviceReposi
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
+            await transaction.RollbackAsync();
+
+            logger.LogError(
+                ex,
                 "Failed to insert device usage record for device {DeviceId} (user: {User})",
                 device.Id, device.Name);
+
             throw;
         }
     }
@@ -53,38 +61,42 @@ public class DeviceRepository(IConfiguration configuration, ILogger<DeviceReposi
     public async Task<IReadOnlyCollection<Device>> GetAllAsync()
     {
         await using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        await using var transaction =
+            await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
         try
         {
-            await connection.OpenAsync();
+            const string sql = """
+                               SELECT DISTINCT ON (device_id)
+                                   device_id   AS "Id",
+                                   user_name   AS "Name",
+                                   start_time  AS "StartTime",
+                                   end_time    AS "EndTime",
+                                   app_version AS "Version"
+                               FROM device_usage
+                               ORDER BY device_id, start_time DESC;
+                               """;
 
-        // Return one record per device (latest by start_time) to represent the device in the list.
-        const string sql = """
-                           SELECT DISTINCT ON (device_id)
-                               device_id,
-                               user_name,
-                               start_time,
-                               end_time,
-                               app_version
-                           FROM device_usage
-                           ORDER BY device_id, start_time DESC;
-                           """;
+            var devices = await connection.QueryAsync<Device>(
+                sql,
+                transaction: transaction);
 
-            await using var command = new NpgsqlCommand(sql, connection);
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            await transaction.CommitAsync();
 
-            var result = new List<Device>();
-            while (await reader.ReadAsync())
-            {
-                result.Add(MapDevice(reader));
-            }
+            var result = devices.AsList();
 
-            logger.LogInformation("Loaded {Count} devices (distinct) from database", result.Count);
+            logger.LogInformation(
+                "Loaded {Count} devices (distinct) from database",
+                result.Count);
 
             return result;
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
+
             logger.LogError(ex, "Failed to load devices from database");
             throw;
         }
@@ -93,54 +105,55 @@ public class DeviceRepository(IConfiguration configuration, ILogger<DeviceReposi
     public async Task<IReadOnlyCollection<Device>> GetByDeviceIdAsync(Guid deviceId)
     {
         await using var connection = CreateConnection();
+        await connection.OpenAsync();
+
+        await using var transaction =
+            await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
 
         try
         {
-            await connection.OpenAsync();
+            const string sql = """
+                               SELECT
+                                   device_id   AS "Id",
+                                   user_name   AS "Name",
+                                   start_time  AS "StartTime",
+                                   end_time    AS "EndTime",
+                                   app_version AS "Version"
+                               FROM device_usage
+                               WHERE device_id = @DeviceId
+                               ORDER BY start_time;
+                               """;
 
-        const string sql = """
-                           SELECT device_id,
-                                  user_name,
-                                  start_time,
-                                  end_time,
-                                  app_version
-                           FROM device_usage
-                           WHERE device_id = @device_id
-                           ORDER BY start_time;
-                           """;
+            var devices = await connection.QueryAsync<Device>(
+                sql,
+                new { DeviceId = deviceId },
+                transaction);
 
-            await using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("device_id", deviceId);
+            await transaction.CommitAsync();
 
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            var result = devices.AsList();
 
-            var result = new List<Device>();
-            while (await reader.ReadAsync())
-            {
-                result.Add(MapDevice(reader));
-            }
-
-            logger.LogInformation("Loaded {Count} usage records for device {DeviceId}", result.Count, deviceId);
+            logger.LogInformation(
+                "Loaded {Count} usage records for device {DeviceId}",
+                result.Count, deviceId);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to load usage records for device {DeviceId}", deviceId);
+            await transaction.RollbackAsync();
+
+            logger.LogError(
+                ex,
+                "Failed to load usage records for device {DeviceId}",
+                deviceId);
+
             throw;
         }
     }
 
-    private static Device MapDevice(IDataRecord record) =>
-        new()
-        {
-            Id = record.GetGuid(record.GetOrdinal("device_id")),
-            Name = record.GetString(record.GetOrdinal("user_name")),
-            StartTime = record.GetDateTime(record.GetOrdinal("start_time")),
-            EndTime = record.GetDateTime(record.GetOrdinal("end_time")),
-            Version = record.GetString(record.GetOrdinal("app_version"))
-        };
+    private static NpgsqlConnection CreateConnection(string cs) => new(cs);
 
     private NpgsqlConnection CreateConnection() => new(_connectionString);
 }
-
